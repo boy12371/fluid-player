@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400&subset=cyrillic,greek,latin-ext');
-
+/* TODO: move to code */
 .fluid_video_wrapper {
     animation : none;
     animation-delay : 0;
@@ -404,10 +403,10 @@
 
 .fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_fluid_control_duration.cardboard_time {
     left: 13px;
-    top: -15px;    
+    top: -15px;
 }
 .fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_fluid_control_duration.cardboard_time .ad_timer_prefix {
-    color: #F2C94C;    
+    color: #F2C94C;
 }
 
 .fluid_video_wrapper.fluid_player_layout_default .ad_countdown .ad_timer_prefix{
@@ -487,36 +486,36 @@
     display: block;
     left: calc(50% - 12px);
     top: 0px;
-    position: absolute;    
+    position: absolute;
 }
 
 .fluid_video_wrapper.fluid_player_layout_default .fluid_vr_container .fluid_vr_joystick_panel .fluid_vr_joystick_left{
     background-position: -336px -55px;
     -webkit-transform: rotate(180deg);  /* Chrome, Opera 15+, Safari 3.1+ */
     -ms-transform: rotate(1890deg);  /* IE 9 */
-    transform: rotate(180deg);  /* Firefox 16+, IE 10+, Opera  */   
+    transform: rotate(180deg);  /* Firefox 16+, IE 10+, Opera  */
     display: block;
     left: 0px;
     top: 24px;
-    position: absolute;   
+    position: absolute;
 }
 
 .fluid_video_wrapper.fluid_player_layout_default .fluid_vr_container .fluid_vr_joystick_panel .fluid_vr_joystick_right{
     background-position: -336px -55px;
     -webkit-transform: rotate(0deg);  /* Chrome, Opera 15+, Safari 3.1+ */
     -ms-transform: rotate(0deg);  /* IE 9 */
-    transform: rotate(0deg);  /* Firefox 16+, IE 10+, Opera  */  
+    transform: rotate(0deg);  /* Firefox 16+, IE 10+, Opera  */
     display: block;
     right: 0px;
     top: 24px;
-    position: absolute;      
+    position: absolute;
 }
 
 .fluid_video_wrapper.fluid_player_layout_default .fluid_vr_container .fluid_vr_joystick_panel .fluid_vr_joystick_down{
     background-position: -336px -55px;
     -webkit-transform: rotate(90deg);  /* Chrome, Opera 15+, Safari 3.1+ */
     -ms-transform: rotate(90deg);  /* IE 9 */
-    transform: rotate(90deg);  /* Firefox 16+, IE 10+, Opera  */  
+    transform: rotate(90deg);  /* Firefox 16+, IE 10+, Opera  */
     display: block;
     left: calc(50% - 12px);
     top: 48px;
@@ -528,8 +527,8 @@
     top: 72px;
     -webkit-transform: rotate(0deg);  /* Chrome, Opera 15+, Safari 3.1+ */
     -ms-transform: rotate(0deg);  /* IE 9 */
-    transform: rotate(0deg);  /* Firefox 16+, IE 10+, Opera  */    
-    position: absolute;  
+    transform: rotate(0deg);  /* Firefox 16+, IE 10+, Opera  */
+    position: absolute;
     left: calc(50% - 12px);
 }
 
@@ -538,8 +537,8 @@
     top: 72px;
     -webkit-transform: rotate(0deg);  /* Chrome, Opera 15+, Safari 3.1+ */
     -ms-transform: rotate(0deg);  /* IE 9 */
-    transform: rotate(0deg);  /* Firefox 16+, IE 10+, Opera  */   
-    position: absolute; 
+    transform: rotate(0deg);  /* Firefox 16+, IE 10+, Opera  */
+    position: absolute;
     right: 0;
 }
 
@@ -549,8 +548,8 @@
     -webkit-transform: rotate(0deg);  /* Chrome, Opera 15+, Safari 3.1+ */
     -ms-transform: rotate(0deg);  /* IE 9 */
     transform: rotate(0deg);  /* Firefox 16+, IE 10+, Opera  */
-    position: absolute; 
-    left: 0; 
+    position: absolute;
+    left: 0;
 }
 
 .fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container.fluid_vr_controls_container{
@@ -612,10 +611,10 @@
     display: inline;
     background: black;
     color: white;
-    font-size: 1em;  
+    font-size: 1em;
     font-family: 'Roboto', sans-serif;
     padding: 0.25em;
-    border-radius: 4px;  
+    border-radius: 4px;
 }
 
 .fluid_video_wrapper.fluid_player_layout_default .fade_out {
@@ -899,7 +898,7 @@ _:-ms-lang(x),
     user-select: none;
 }
 
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_right .fluid_button_video_source .fluid_video_sources_title, 
+.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_right .fluid_button_video_source .fluid_video_sources_title,
 .fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_right .fluid_button_subtitles .fluid_subtitles_title {
     width: 80px;
     overflow: hidden;

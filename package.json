@@ -1,0 +1,38 @@
+{
+  "name": "fluid-player",
+  "version": "3.0.0",
+  "description": "Fluid Player is a free HTML5 video player",
+  "main": "src/fluidplayer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "rollup": "rollup -c rollup.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fluid-player/fluid-player.git"
+  },
+  "author": "EXOGROUP <info@exogroup.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fluid-player/fluid-player/issues"
+  },
+  "homepage": "https://github.com/fluid-player/fluid-player#readme",
+  "browserslist": [
+    "> 0.25%",
+    "not dead"
+  ],
+  "dependencies": {
+    "dashjs": "^3.0.2",
+    "hls.js": "^0.13.2",
+    "panolens": "^0.11.0",
+    "three": "^0.114.0",
+    "vtt.js": "^0.13.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.7",
+    "@babel/preset-env": "^7.8.7",
+    "rollup": "^2.0.3",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-uglify": "^6.0.4"
+  }
+}
