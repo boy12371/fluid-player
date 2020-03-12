@@ -1,6 +1,7 @@
 'use strict';
 
 import promisePolyfill from 'es6-promise';
+
 promisePolyfill.polyfill();
 
 const fluidPlayerScriptLocation = function () {
@@ -153,20 +154,6 @@ const fluidPlayerClass = function () {
     // TODO: remove
     self.requestScript = (url, callback) => {
         throw 'No!';
-
-        // Adding the script tag to the head
-        const head = document.getElementsByTagName('head')[0];
-        const script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src = url;
-
-        // Then bind the event to the callback function.
-        // There are several events for cross browser compatibility.
-        script.onreadystatechange = callback;
-        script.onload = callback;
-
-        // Fire the loading
-        head.appendChild(script);
     };
 
     self.isTouchDevice = () => {
@@ -967,7 +954,7 @@ const fluidPlayerClass = function () {
                 self.adPool[adListId] = Object.assign({}, tmpOptions);
                 const event = document.createEvent('Event');
                 event.initEvent('adId_' + adListId, false, true);
-                document.getElementById(self.videoPlayerId).dispatchEvent(event);
+                self.domRef.player.dispatchEvent(event);
 
                 self.displayOptions.vastOptions.vastAdvanced.vastLoadedCallback();
 
@@ -1557,16 +1544,12 @@ const fluidPlayerClass = function () {
 
         // Looping through the object and registering each of the callbacks with the creative
         for (let eventName in callbacks) {
-
-            self.vpaidAdUnit.subscribe(callbacks[eventName],
-                eventName, self);
-
+            self.vpaidAdUnit.subscribe(callbacks[eventName], eventName, self);
         }
 
     };
 
     self.loadVpaid = (adListId, vpaidJsUrl) => {
-
         const vpaidIframe = document.createElement('iframe');
         vpaidIframe.id = self.videoPlayerId + "_" + adListId + "_fluid_vpaid_iframe";
         vpaidIframe.className = 'fluid_vpaid_iframe';
@@ -2119,7 +2102,7 @@ const fluidPlayerClass = function () {
             slotWrapper.style.height = adHeight + 'px';
 
             if (showCloseButton) {
-                var slotFrame = document.createElement('div');
+                const slotFrame = document.createElement('div');
                 slotFrame.className = 'fluid_vpaidNonLinear_frame';
                 slotFrame.style.width = adWidth + 'px';
                 slotFrame.style.height = adHeight + 'px';
@@ -2299,7 +2282,7 @@ const fluidPlayerClass = function () {
         closeBtn.title = self.displayOptions.layoutControls.closeButtonCaption;
         const tempadListId = adListId;
         closeBtn.onclick = function (event) {
-            this.parentElement.remove(self);
+            this.parentElement.removeChild(this); // TODO: verify
             if (typeof event.stopImmediatePropagation !== 'undefined') {
                 event.stopImmediatePropagation();
             }
@@ -2636,8 +2619,8 @@ const fluidPlayerClass = function () {
 
         // Task: close nonLinear ads
         if (timerPoolKeytimeCloseStaticAdsLength > 0) {
-            for (var index = 0; index < timerPoolKeytimeCloseStaticAdsLength; index++) {
-                var adListId = self.timerPool[keyTime]['closeStaticAd'][index].closeStaticAd;
+            for (let index = 0; index < timerPoolKeytimeCloseStaticAdsLength; index++) {
+                const adListId = self.timerPool[keyTime]['closeStaticAd'][index].closeStaticAd;
 
                 if (self.adList[adListId].played === true) {
                     self.completeNonLinearStatic(adListId);
@@ -2664,8 +2647,8 @@ const fluidPlayerClass = function () {
 
         // Task: play nonLinear ads
         if (timerPoolKeytimeNonlinearAdsLength > 0) {
-            for (var index = 0; index < timerPoolKeytimeNonlinearAdsLength; index++) {
-                var adListId = self.timerPool[keyTime]['nonLinear'][index].adListId;
+            for (let index = 0; index < timerPoolKeytimeNonlinearAdsLength; index++) {
+                const adListId = self.timerPool[keyTime]['nonLinear'][index].adListId;
                 const vastOptions = self.adPool[adListId];
 
                 // we are not supporting nonLinear ads in cardBoard mode
@@ -2998,48 +2981,48 @@ const fluidPlayerClass = function () {
             }
         }
 
+        let CTATextPosition;
         if (ctaButton !== null) {
+            CTATextPosition = self.displayOptions.vastOptions.adCTATextPosition.toLowerCase();
 
-            var CTATextPosition = self.displayOptions.vastOptions.adCTATextPosition.toLowerCase();
-
-            if (allowedPosition.indexOf(CTATextPosition) == -1) {
+            if (allowedPosition.indexOf(CTATextPosition) === -1) {
                 console.log('[FP Error] Invalid position for CTAText. Reverting to "bottom right"');
                 CTATextPosition = 'bottom right';
             }
 
             positionsCTA = CTATextPosition.split(' ');
 
-            isBottom = positionsCTA[0] == 'bottom';
+            isBottom = positionsCTA[0] === 'bottom';
 
             ctaButton.style[positionsCTA[0]] = defaultPositions[positionsCTA[0]][positionsCTA[1]].v + 'px';
             ctaButton.style[positionsCTA[1]] = defaultPositions[positionsCTA[0]][positionsCTA[1]].h + 'px';
 
-            if (isBottom && positionsCTA[1] == 'right') {
+            if (isBottom && positionsCTA[1] === 'right') {
                 ctaButton.style[positionsCTA[0]] = defaultPositions[positionsCTA[0]][positionsCTA[1]].v + skipButtonHeightWithSpacing + 'px';
             }
 
             ctaButtonHeightWithSpacing = ctaButton.offsetHeight + pixelSpacing + 'px';
-
         }
 
+        let adPlayingDivPosition;
+        let positionsAdText;
         if (adPlayingDiv !== null) {
+            adPlayingDivPosition = (adListData.adTextPosition !== null) ? adListData.adTextPosition.toLowerCase() : this.displayOptions.vastOptions.adTextPosition.toLowerCase();
 
-            var adPlayingDivPosition = (adListData.adTextPosition !== null) ? adListData.adTextPosition.toLowerCase() : this.displayOptions.vastOptions.adTextPosition.toLowerCase();
-
-            if (allowedPosition.indexOf(adPlayingDivPosition) == -1) {
+            if (allowedPosition.indexOf(adPlayingDivPosition) === -1) {
                 console.log('[FP Error] Invalid position for adText. Reverting to "top left"');
                 adPlayingDivPosition = 'top left';
             }
 
-            var positionsAdText = adPlayingDivPosition.split(' ');
+            positionsAdText = adPlayingDivPosition.split(' ');
             adPlayingDiv.style[positionsAdText[0]] = defaultPositions[positionsAdText[0]][positionsAdText[1]].v + 'px';
             adPlayingDiv.style[positionsAdText[1]] = defaultPositions[positionsAdText[0]][positionsAdText[1]].h + 'px';
             adPlayingDivHeightWithSpacing = adPlayingDiv.offsetHeight + pixelSpacing + 'px';
         }
 
-        if (ctaButtonHeightWithSpacing > 0 && adPlayingDivHeightWithSpacing > 0 && CTATextPosition == adPlayingDivPosition) {
+        if (ctaButtonHeightWithSpacing > 0 && adPlayingDivHeightWithSpacing > 0 && CTATextPosition === adPlayingDivPosition) {
             if (isBottom) {
-                if (positionsCTA[1] == 'right') {
+                if (positionsCTA[1] === 'right') {
                     adPlayingDiv.style.bottom = defaultPositions[positionsAdText[0]][positionsAdText[1]].v + skipButtonHeightWithSpacing + ctaButtonHeightWithSpacing + 'px';
                 } else {
                     adPlayingDiv.style.bottom = defaultPositions[positionsAdText[0]][positionsAdText[1]].v + ctaButtonHeightWithSpacing + 'px';
@@ -3058,7 +3041,6 @@ const fluidPlayerClass = function () {
     };
 
     self.addCTAButton = (landingPage) => {
-
         if (!landingPage) {
             return;
         }
@@ -3115,7 +3097,6 @@ const fluidPlayerClass = function () {
                 self.domRef.player.removeEventListener('timeupdate', self.decreaseSkipOffset);
             }
         } else {
-            sec = 0;
             self.domRef.player.removeEventListener('timeupdate', self.domRef.player.decreaseSkipOffset);
         }
     };
@@ -3277,13 +3258,7 @@ const fluidPlayerClass = function () {
     };
 
     self.checkShouldDisplayVolumeBar = () => {
-        const deviceType = self.getMobileOs();
-
-        if (deviceType.userOs === 'iOS') {
-            return false;
-        }
-
-        return true;
+        return self.getMobileOs().userOs !== 'iOS';
     };
 
     self.generateCustomControlTags = () => {
@@ -3320,12 +3295,11 @@ const fluidPlayerClass = function () {
     };
 
     self.controlPlayPauseToggle = (videoPlayerId) => {
-        var videoPlayer = document.getElementById(self.videoPlayerId);
+        const videoPlayer = self.domRef.player;
         const playPauseButton = videoPlayer.parentNode.getElementsByClassName('fluid_control_playpause');
         const menuOptionPlay = document.getElementById(videoPlayerId + 'context_option_play');
         const controlsDisplay = videoPlayer.parentNode.getElementsByClassName('fluid_controls_container');
         const fpLogo = document.getElementById(self.videoPlayerId + '_logo');
-        var videoPlayer = document.getElementById(self.videoPlayerId);
 
         const initialPlay = document.getElementById(videoPlayerId + '_fluid_initial_play');
         if (initialPlay) {
@@ -3334,12 +3308,11 @@ const fluidPlayerClass = function () {
         }
 
         if (!videoPlayer.paused) {
-
-            for (var i = 0; i < playPauseButton.length; i++) {
+            for (let i = 0; i < playPauseButton.length; i++) {
                 playPauseButton[i].className = playPauseButton[i].className.replace(/\bfluid_button_play\b/g, 'fluid_button_pause');
             }
 
-            for (var i = 0; i < controlsDisplay.length; i++) {
+            for (let i = 0; i < controlsDisplay.length; i++) {
                 controlsDisplay[i].classList.remove('initial_controls_show');
             }
 
@@ -3352,12 +3325,11 @@ const fluidPlayerClass = function () {
             }
 
         } else {
-
-            for (var i = 0; i < playPauseButton.length; i++) {
+            for (let i = 0; i < playPauseButton.length; i++) {
                 playPauseButton[i].className = playPauseButton[i].className.replace(/\bfluid_button_pause\b/g, 'fluid_button_play');
             }
 
-            for (var i = 0; i < controlsDisplay.length; i++) {
+            for (let i = 0; i < controlsDisplay.length; i++) {
                 controlsDisplay[i].classList.add('initial_controls_show');
             }
 
@@ -3417,10 +3389,11 @@ const fluidPlayerClass = function () {
         const formatMinutes = this.pad(formatDateObj.getUTCMinutes());
         const formatSeconds = this.pad(formatDateObj.getSeconds());
 
+        let result;
         if (formatHours >= 1) {
-            var result = formatHours + ':' + formatMinutes + ':' + formatSeconds;
+            result = formatHours + ':' + formatMinutes + ':' + formatSeconds;
         } else {
-            var result = formatMinutes + ':' + formatSeconds;
+            result = formatMinutes + ':' + formatSeconds;
         }
 
         return result;
@@ -3465,7 +3438,7 @@ const fluidPlayerClass = function () {
         }
 
         if (videoPlayerTag.volume && !videoPlayerTag.muted) {
-            for (var i = 0; i < muteButtonTag.length; i++) {
+            for (let i = 0; i < muteButtonTag.length; i++) {
                 muteButtonTag[i].className = muteButtonTag[i].className.replace(/\bfluid_button_mute\b/g, 'fluid_button_volume');
             }
 
@@ -3474,7 +3447,7 @@ const fluidPlayerClass = function () {
             }
 
         } else {
-            for (var i = 0; i < muteButtonTag.length; i++) {
+            for (let i = 0; i < muteButtonTag.length; i++) {
                 muteButtonTag[i].className = muteButtonTag[i].className.replace(/\bfluid_button_volume\b/g, 'fluid_button_mute');
             }
 
@@ -3586,28 +3559,23 @@ const fluidPlayerClass = function () {
 
         if (requestFullscreenFunctionNames) {
             // iOS fullscreen elements are different and so need to be treated separately
-            switch (requestFullscreenFunctionNames.goFullscreen) {
-                case 'webkitEnterFullscreen':
-                    if (!videoPlayerTag[requestFullscreenFunctionNames.isFullscreen]) {
-                        functionNameToExecute = 'videoPlayerTag.' + requestFullscreenFunctionNames.goFullscreen + '();';
-                        this.fullscreenOn(fullscreenButton, menuOptionFullscreen);
-                        new Function('videoPlayerTag', functionNameToExecute)(videoPlayerTag);
-                    }
-
-                    break;
-                default:
-                    if (document[requestFullscreenFunctionNames.isFullscreen] === null) {
-                        //Go fullscreen
-                        functionNameToExecute = 'videoPlayerTag.' + requestFullscreenFunctionNames.goFullscreen + '();';
-                        this.fullscreenOn(fullscreenButton, menuOptionFullscreen);
-                    } else {
-                        //Exit fullscreen
-                        functionNameToExecute = 'document.' + requestFullscreenFunctionNames.exitFullscreen + '();';
-                        this.fullscreenOff(fullscreenButton, menuOptionFullscreen);
-                    }
-                    new Function('videoPlayerTag', functionNameToExecute)(fullscreenTag);
-
-                    break;
+            if (requestFullscreenFunctionNames.goFullscreen === 'webkitEnterFullscreen') {
+                if (!videoPlayerTag[requestFullscreenFunctionNames.isFullscreen]) {
+                    functionNameToExecute = 'videoPlayerTag.' + requestFullscreenFunctionNames.goFullscreen + '();';
+                    this.fullscreenOn(fullscreenButton, menuOptionFullscreen);
+                    new Function('videoPlayerTag', functionNameToExecute)(videoPlayerTag);
+                }
+            } else {
+                if (document[requestFullscreenFunctionNames.isFullscreen] === null) {
+                    //Go fullscreen
+                    functionNameToExecute = 'videoPlayerTag.' + requestFullscreenFunctionNames.goFullscreen + '();';
+                    this.fullscreenOn(fullscreenButton, menuOptionFullscreen);
+                } else {
+                    //Exit fullscreen
+                    functionNameToExecute = 'document.' + requestFullscreenFunctionNames.exitFullscreen + '();';
+                    this.fullscreenOff(fullscreenButton, menuOptionFullscreen);
+                }
+                new Function('videoPlayerTag', functionNameToExecute)(fullscreenTag);
             }
         } else {
             //The browser does not support the Fullscreen API, so a pseudo-fullscreen implementation is used
@@ -3733,13 +3701,12 @@ const fluidPlayerClass = function () {
     };
 
     self.onProgressbarMouseDown = (videoPlayerId, event) => {
-
         self.displayOptions.layoutControls.playPauseAnimation = false;
         // we need an initial position for touchstart events, as mouse up has no offset x for iOS
         let initialPosition;
 
         if (self.displayOptions.layoutControls.showCardBoardView) {
-            initialPosition = self.getEventOffsetX(event, event.srcElement.parentNode);
+            initialPosition = self.getEventOffsetX(event, event.target.parentNode);
         } else {
             initialPosition = self.getEventOffsetX(event, document.getElementById(videoPlayerId + '_fluid_controls_progress_container'));
         }
@@ -3764,7 +3731,7 @@ const fluidPlayerClass = function () {
         }
 
         function onProgressbarMouseMove(event) {
-            const currentX = self.getEventOffsetX(event, event.srcElement.parentNode);
+            const currentX = self.getEventOffsetX(event, event.target.parentNode);
             initialPosition = NaN; // mouse up will fire after the move, we don't want to trigger the initial position in the event of iOS
             shiftTime(videoPlayerId, currentX);
             self.contolProgressbarUpdate(self.videoPlayerId);
@@ -3776,7 +3743,7 @@ const fluidPlayerClass = function () {
             document.removeEventListener('touchmove', onProgressbarMouseMove);
             document.removeEventListener('mouseup', onProgressbarMouseUp);
             document.removeEventListener('touchend', onProgressbarMouseUp);
-            let clickedX = self.getEventOffsetX(event, event.srcElement.parentNode);
+            let clickedX = self.getEventOffsetX(event, event.target.parentNode);
             if (isNaN(clickedX) && !isNaN(initialPosition)) {
                 clickedX = initialPosition;
             }
@@ -3865,14 +3832,10 @@ const fluidPlayerClass = function () {
         const validateVastList = function (item) {
             let hasError = false;
 
-            switch (item.roll) {
-
-                case 'midRoll':
-                    if (typeof item.timer === 'undefined') {
-                        hasError = true;
-                    }
-                    break;
-
+            if (item.roll === 'midRoll') {
+                if (typeof item.timer === 'undefined') {
+                    hasError = true;
+                }
             }
 
             return hasError;
@@ -4055,7 +4018,7 @@ const fluidPlayerClass = function () {
 
         videoPlayerInstance.captureKey = function (event) {
             event.stopPropagation();
-            const keyCode = event.keyCode;
+            const keyCode = event.keyCode; // TODO .keyCode is deprecated
 
             switch (keyCode) {
 
@@ -4285,12 +4248,12 @@ const fluidPlayerClass = function () {
             self.playPauseToggle(self.domRef.player);
         }, false);
 
-        document.getElementById(self.videoPlayerId).addEventListener('play', function () {
+        self.domRef.player.addEventListener('play', function () {
             self.controlPlayPauseToggle(self.videoPlayerId);
             self.contolVolumebarUpdate(self.videoPlayerId);
         }, false);
 
-        document.getElementById(self.videoPlayerId).addEventListener('fluidplayerpause', function () {
+        self.domRef.player.addEventListener('fluidplayerpause', function () {
             self.controlPlayPauseToggle(self.videoPlayerId);
         }, false);
 
@@ -4377,8 +4340,7 @@ const fluidPlayerClass = function () {
             const hoverQ = self.getEventOffsetX(event, progressContainer);
 
             const hoverSecondQ = self.currentVideoDuration * hoverQ / totalWidth;
-            const showad = self.formatTime(hoverSecondQ);
-            hoverTimeItem.innerText = showad;
+            hoverTimeItem.innerText = self.formatTime(hoverSecondQ);
 
             hoverTimeItem.style.display = 'block';
             hoverTimeItem.style.left = (hoverSecondQ / self.domRef.player.duration * 100) + "%";
@@ -4392,7 +4354,7 @@ const fluidPlayerClass = function () {
     };
 
     self.setCustomContextMenu = () => {
-        const videoPlayerTag = document.getElementById(self.videoPlayerId);
+        const videoPlayerTag = self.domRef.player;
         const playerWrapper = document.getElementById('fluid_video_wrapper_' + self.videoPlayerId);
 
         //Create own context menu
@@ -4481,13 +4443,17 @@ const fluidPlayerClass = function () {
 
         // Primary Colour
 
-        const backgroundColor = (self.displayOptions.layoutControls.primaryColor) ? self.displayOptions.layoutControls.primaryColor : "white";
-        document.getElementById(self.videoPlayerId + '_vast_control_currentprogress').style.backgroundColor = backgroundColor;
+        document.getElementById(self.videoPlayerId + '_vast_control_currentprogress').style.backgroundColor =
+            self.displayOptions.layoutControls.primaryColor
+                ? self.displayOptions.layoutControls.primaryColor
+                : "white";
 
         self.domRef.player.parentNode.insertBefore(divLoading, self.domRef.player.nextSibling);
 
         let remainingAttemptsToInitiateVolumeBar = 100;
 
+        // TODO ->>
+        // TODO: self referencing against local variable. This is not good at all.
         /**
          * Set the volumebar after its elements are properly rendered.
          */
@@ -4504,16 +4470,15 @@ const fluidPlayerClass = function () {
             }
         };
 
+        let initiateVolumebarTimerId = setInterval(initiateVolumebar, 100);
+        // <<- ENDTODO
+
         /*
             Dobule click fullscreen
         */
         if (self.displayOptions.layoutControls.doubleclickFullscreen) {
-            self.domRef.player.addEventListener('dblclick', function () {
-                self.fullscreenToggle();
-            }, false);
+            self.domRef.player.addEventListener('dblclick', self.fullscreenToggle);
         }
-
-        var initiateVolumebarTimerId = setInterval(initiateVolumebar, 100);
 
         self.initHtmlOnPauseBlock();
 
@@ -4619,7 +4584,7 @@ const fluidPlayerClass = function () {
                         let imageUrl;
                         if (self.displayOptions.layoutControls.timelinePreview.spriteRelativePath
                             && self.displayOptions.layoutControls.timelinePreview.file.indexOf('/') !== -1
-                            && (typeof self.displayOptions.layoutControls.timelinePreview.sprite === 'undefined' || self.displayOptions.layoutControls.timelinePreview.sprite == '')
+                            && (typeof self.displayOptions.layoutControls.timelinePreview.sprite === 'undefined' || self.displayOptions.layoutControls.timelinePreview.sprite === '')
                         ) {
                             imageUrl = self.displayOptions.layoutControls.timelinePreview.file.substring(0, self.displayOptions.layoutControls.timelinePreview.file.lastIndexOf('/'));
                             imageUrl += '/' + tempThumbnailData[0];
@@ -4655,7 +4620,7 @@ const fluidPlayerClass = function () {
                 const textResponse = xmlHttpReq.responseText;
 
                 const webVttParser = new WebVTTParser();
-                var vttRawData = webVttParser.parse(textResponse);
+                const vttRawData = webVttParser.parse(textResponse);
 
                 self.timelinePreviewData = convertVttRawData(vttRawData);
             }
@@ -4740,43 +4705,34 @@ const fluidPlayerClass = function () {
     };
 
     self.setupThumbnailPreview = () => {
-        if (
-            self.displayOptions.layoutControls.timelinePreview &&
+        if (self.displayOptions.layoutControls.timelinePreview &&
             (typeof self.displayOptions.layoutControls.timelinePreview.file === 'string') &&
-            (typeof self.displayOptions.layoutControls.timelinePreview.type === 'string')
-        ) {
-            switch (self.displayOptions.layoutControls.timelinePreview.type) {
-                case 'VTT':
-                    self.requestScript(
-                        fluidPlayerScriptLocation + self.vttParserScript,
-                        self.setupThumbnailPreviewVtt.bind(this)
-                    );
+            (typeof self.displayOptions.layoutControls.timelinePreview.type === 'string')) {
 
-                    let eventOn = 'mousemove';
-                    let eventOff = 'mouseleave';
-                    if (self.mobileInfo.userOs) {
-                        eventOn = 'touchmove';
-                        eventOff = 'touchend';
-                    }
-
-                    document.getElementById(self.videoPlayerId + '_fluid_controls_progress_container')
-                        .addEventListener(eventOn, self.drawTimelinePreview.bind(self), false);
-                    document.getElementById(self.videoPlayerId + '_fluid_controls_progress_container')
-                        .addEventListener(eventOff, function (event) {
-                            const progress = document.getElementById(self.videoPlayerId + '_fluid_controls_progress_container');
-                            if (typeof event.clientX !== 'undefined' && progress.contains(document.elementFromPoint(event.clientX, event.clientY))) {
-                                //False positive (Chrome bug when fast click causes leave event)
-                                return;
-                            }
-                            document.getElementById(self.videoPlayerId + '_fluid_timeline_preview_container').style.display = 'none';
-                            document.getElementById(self.videoPlayerId + '_fluid_timeline_preview_container_shadow').style.display = 'none';
-                        }, false);
-
-                    self.generateTimelinePreviewTags();
-                    break;
-
-                default:
-                    break;
+            if (self.displayOptions.layoutControls.timelinePreview.type === 'VTT') {
+                self.requestScript(
+                    fluidPlayerScriptLocation + self.vttParserScript,
+                    self.setupThumbnailPreviewVtt.bind(this)
+                );
+                let eventOn = 'mousemove';
+                let eventOff = 'mouseleave';
+                if (self.mobileInfo.userOs) {
+                    eventOn = 'touchmove';
+                    eventOff = 'touchend';
+                }
+                document.getElementById(self.videoPlayerId + '_fluid_controls_progress_container')
+                    .addEventListener(eventOn, self.drawTimelinePreview.bind(self), false);
+                document.getElementById(self.videoPlayerId + '_fluid_controls_progress_container')
+                    .addEventListener(eventOff, function (event) {
+                        const progress = document.getElementById(self.videoPlayerId + '_fluid_controls_progress_container');
+                        if (typeof event.clientX !== 'undefined' && progress.contains(document.elementFromPoint(event.clientX, event.clientY))) {
+                            //False positive (Chrome bug when fast click causes leave event)
+                            return;
+                        }
+                        document.getElementById(self.videoPlayerId + '_fluid_timeline_preview_container').style.display = 'none';
+                        document.getElementById(self.videoPlayerId + '_fluid_timeline_preview_container_shadow').style.display = 'none';
+                    }, false);
+                self.generateTimelinePreviewTags();
             }
 
             self.showTimeOnHover = false;
@@ -4784,7 +4740,7 @@ const fluidPlayerClass = function () {
     };
 
     self.setupPlayerWrapper = () => {
-        const videoPlayer = document.getElementById(self.videoPlayerId);
+        const videoPlayer = self.domRef.player;
 
         //Create a Wrapper Div element
         const divVideoWrapper = document.createElement('div');
@@ -4822,7 +4778,7 @@ const fluidPlayerClass = function () {
     };
 
     self.subtitleFetchParse = (subtitleItem) => {
-        const videoPlayerTag = document.getElementById(self.videoPlayerId);
+        const videoPlayerTag = self.domRef.player;
 
         self.sendRequest(
             subtitleItem.url,
@@ -4868,7 +4824,7 @@ const fluidPlayerClass = function () {
 
                 const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
                 const cues = [];
-                const regions = [];
+                const regions = []; // TODO: unused?
                 parser.oncue = function (cue) {
                     cues.push(cue);
                 };
@@ -4972,21 +4928,17 @@ const fluidPlayerClass = function () {
     };
 
     self.renderSubtitles = () => {
-        const videoPlayer = document.getElementById(self.videoPlayerId);
+        const videoPlayer = self.domRef.player;
 
         //if content is playing then no subtitles
-        var currentTime = Math.floor(videoPlayer.currentTime);
-        var subtitlesAvailable = false;
-        var subtitlesContainer = document.getElementById(self.videoPlayerId + '_fluid_subtitles_container');
+        let currentTime = Math.floor(videoPlayer.currentTime);
+        let subtitlesAvailable = false;
+        let subtitlesContainer = document.getElementById(self.videoPlayerId + '_fluid_subtitles_container');
 
         if (self.isCurrentlyPlayingAd) {
             subtitlesContainer.innerHTML = '';
             return;
         }
-
-        var currentTime = Math.floor(videoPlayer.currentTime);
-        var subtitlesAvailable = false;
-        var subtitlesContainer = document.getElementById(self.videoPlayerId + '_fluid_subtitles_container');
 
         for (let i = 0; i < self.subtitlesData.length; i++) {
             if (currentTime >= (self.subtitlesData[i].startTime) && currentTime <= (self.subtitlesData[i].endTime)) {
@@ -5010,7 +4962,7 @@ const fluidPlayerClass = function () {
             return;
         }
 
-        if (subtitleChangeList.style.display == 'none') {
+        if (subtitleChangeList.style.display === 'none') {
             subtitleChangeList.style.display = 'block';
             const mouseOut = function (event) {
                 sourceChangeListContainer.removeEventListener('mouseleave', mouseOut);
@@ -5023,7 +4975,7 @@ const fluidPlayerClass = function () {
     };
 
     self.createSubtitles = () => {
-        const videoPlayerTag = document.getElementById(self.videoPlayerId);
+        const videoPlayerTag = self.domRef.player;
 
         const divSubtitlesContainer = document.createElement('div');
         divSubtitlesContainer.id = self.videoPlayerId + '_fluid_subtitles_container';
@@ -5041,7 +4993,7 @@ const fluidPlayerClass = function () {
     };
 
     self.createCardboardJoystickButton = (identity) => {
-        const videoPlayerTag = document.getElementById(self.videoPlayerId);
+        const videoPlayerTag = self.domRef.player;
 
         const vrJoystickPanel = document.getElementById(self.videoPlayerId + '_fluid_vr_joystick_panel');
         const joystickButton = document.createElement('div');
@@ -5149,7 +5101,7 @@ const fluidPlayerClass = function () {
     self.cardBoardSwitchToNormal = () => {
         const vrJoystickPanel = document.getElementById(self.videoPlayerId + '_fluid_vr_joystick_panel');
         const controlBar = document.getElementById(self.videoPlayerId + '_fluid_controls_container');
-        const videoPlayerTag = document.getElementById(self.videoPlayerId);
+        const videoPlayerTag = self.domRef.player;
 
         self.vrViewer.enableEffect(PANOLENS.MODES.NORMAL);
         self.vrViewer.onWindowResize();
@@ -5215,7 +5167,7 @@ const fluidPlayerClass = function () {
 
     self.cardBoardCreateVRControls = () => {
         const controlBar = document.getElementById(self.videoPlayerId + '_fluid_controls_container');
-        const videoPlayerTag = document.getElementById(self.videoPlayerId);
+        const videoPlayerTag = self.domRef.player;
 
         // create and append dual control bar
         const newControlBar = controlBar.cloneNode(true);
@@ -5233,7 +5185,7 @@ const fluidPlayerClass = function () {
     self.cardBoardSwitchToVR = () => {
         const vrJoystickPanel = document.getElementById(self.videoPlayerId + '_fluid_vr_joystick_panel');
         const controlBar = document.getElementById(self.videoPlayerId + '_fluid_controls_container');
-        const videoPlayerTag = document.getElementById(self.videoPlayerId);
+        const videoPlayerTag = self.domRef.player;
 
         self.vrViewer.enableEffect(PANOLENS.MODES.CARDBOARD);
 
@@ -5289,21 +5241,18 @@ const fluidPlayerClass = function () {
             let durationText = '';
 
             if (self.isCurrentlyPlayingAd) {
-
                 durationText = "<span class='ad_timer_prefix'>AD : </span>" + currentPlayTime + ' / ' + totalTime;
 
-                for (var index = 0; index < timePlaceholder.length; index++) {
-                    timePlaceholder[index].classList.add("ad_timer_prefix");
+                for (let i = 0; i < timePlaceholder.length; i++) {
+                    timePlaceholder[i].classList.add("ad_timer_prefix");
                 }
 
             } else {
-
                 durationText = currentPlayTime + ' / ' + totalTime;
 
-                for (var index = 0; index < timePlaceholder.length; index++) {
-                    timePlaceholder[index].classList.remove("ad_timer_prefix");
+                for (let i = 0; i < timePlaceholder.length; i++) {
+                    timePlaceholder[i].classList.remove("ad_timer_prefix");
                 }
-
             }
 
             for (let i = 0; i < timePlaceholder.length; i++) {
@@ -5318,7 +5267,7 @@ const fluidPlayerClass = function () {
 
     self.createCardboardView = () => {
 
-        const videoPlayerTag = document.getElementById(self.videoPlayerId);
+        const videoPlayerTag = self.domRef.player;
         const vrSwitchButton = videoPlayerTag.parentNode.getElementsByClassName('fluid_control_cardboard');
 
         // Create a container for 360degree
@@ -5413,7 +5362,7 @@ const fluidPlayerClass = function () {
     };
 
     self.createVideoSourceSwitch = () => {
-        const videoPlayer = document.getElementById(self.videoPlayerId);
+        const videoPlayer = self.domRef.player;
 
         const sources = [];
         const sourcesList = videoPlayer.querySelectorAll('source');
@@ -5519,7 +5468,7 @@ const fluidPlayerClass = function () {
     };
 
     self.setVideoSource = (url) => {
-        const videoPlayerTag = document.getElementById(self.videoPlayerId);
+        const videoPlayerTag = self.domRef.player;
 
         if (self.mobileInfo.userOs == "iOS" && url.indexOf('.mkv') > 0) {
             console.log('[FP_ERROR] .mkv files not supported by iOS devices.');
@@ -5546,13 +5495,14 @@ const fluidPlayerClass = function () {
         }
     };
 
+    // TODO: referencing local variable in callback.
     self.setCurrentTimeAndPlay = (newCurrentTime, shouldPlay) => {
         const videoPlayerTag = self.domRef.player;
         const loadedMetadata = function () {
             videoPlayerTag.currentTime = newCurrentTime;
             videoPlayerTag.removeEventListener('loadedmetadata', loadedMetadata);
             // Safari ios and mac fix to set currentTime
-            if (self.mobileInfo.userOs == 'iOS' || self.getBrowserVersion().browserName.toLowerCase() === 'safari') {
+            if (self.mobileInfo.userOs === 'iOS' || self.getBrowserVersion().browserName.toLowerCase() === 'safari') {
                 videoPlayerTag.addEventListener('playing', videoPlayStart);
             }
 
@@ -5563,21 +5513,21 @@ const fluidPlayerClass = function () {
                 self.controlPlayPauseToggle(self.videoPlayerId);
             }
             self.isSwitchingSource = false;
-            videoPlayerTag.style.width = "100%";
-            videoPlayerTag.style.height = "100%";
+            videoPlayerTag.style.width = '100%';
+            videoPlayerTag.style.height = '100%';
         };
-        var videoPlayStart = function () {
+        let videoPlayStart = function () {
             this.currentTime = newCurrentTime;
             videoPlayerTag.removeEventListener('playing', videoPlayStart);
         };
 
-        videoPlayerTag.addEventListener("loadedmetadata", loadedMetadata, false);
+        videoPlayerTag.addEventListener('loadedmetadata', loadedMetadata, false);
 
         videoPlayerTag.load();
     };
 
     self.initTitle = () => {
-        const videoPlayer = document.getElementById(self.videoPlayerId);
+        const videoPlayer = self.domRef.player;
         if (self.displayOptions.layoutControls.title) {
             const titleHolder = document.createElement('div');
             titleHolder.id = self.videoPlayerId + '_title';
@@ -5590,7 +5540,7 @@ const fluidPlayerClass = function () {
     self.hasTitle = () => {
         const title = document.getElementById(this.videoPlayerId + '_title');
         const titleOption = this.displayOptions.layoutControls.title;
-        return (title && titleOption != null) ? true : false;
+        return title && titleOption != null;
     };
 
     self.hideTitle = () => {
@@ -5615,7 +5565,7 @@ const fluidPlayerClass = function () {
     };
 
     self.initLogo = () => {
-        const videoPlayer = document.getElementById(self.videoPlayerId);
+        const videoPlayer = self.domRef.player;
         if (!self.displayOptions.layoutControls.logo.imageUrl) {
             return;
         }
@@ -5685,7 +5635,7 @@ const fluidPlayerClass = function () {
             return;
         }
 
-        const videoPlayer = document.getElementById(self.videoPlayerId);
+        const videoPlayer = self.domRef.player;
         const containerDiv = document.createElement('div');
         containerDiv.id = self.videoPlayerId + '_fluid_html_on_pause';
         containerDiv.className = 'fluid_html_on_pause';
@@ -5710,7 +5660,7 @@ const fluidPlayerClass = function () {
      * Play button in the middle when the video loads
      */
     self.initPlayButton = () => {
-        const videoPlayer = document.getElementById(self.videoPlayerId);
+        const videoPlayer = self.domRef.player;
 
         // Create the html fpr the play button
         const containerDiv = document.createElement('div');
@@ -5751,7 +5701,7 @@ const fluidPlayerClass = function () {
 
     self.userActivityChecker = () => {
         const videoPlayer = document.getElementById('fluid_video_wrapper_' + self.videoPlayerId);
-        const videoPlayerTag = document.getElementById(self.videoPlayerId);
+        const videoPlayerTag = self.domRef.player;
         self.newActivity = null;
 
         let isMouseStillDown = false;
@@ -5775,7 +5725,7 @@ const fluidPlayerClass = function () {
                 }
 
                 if (self.isUserActive === false || !self.isControlBarVisible()) {
-                    var event = new CustomEvent("userActive");
+                    let event = new CustomEvent("userActive");
                     videoPlayerTag.dispatchEvent(event);
                     self.isUserActive = true;
                 }
@@ -5785,7 +5735,7 @@ const fluidPlayerClass = function () {
                 self.inactivityTimeout = setTimeout(function () {
                     if (self.newActivity !== true) {
                         self.isUserActive = false;
-                        event = new CustomEvent("userInactive");
+                        let event = new CustomEvent("userInactive");
                         videoPlayerTag.dispatchEvent(event);
                     } else {
                         clearTimeout(self.inactivityTimeout);
@@ -5803,7 +5753,7 @@ const fluidPlayerClass = function () {
     };
 
     self.hasControlBar = () => {
-        return (document.getElementById(this.videoPlayerId + '_fluid_controls_container')) ? true : false;
+        return !!document.getElementById(this.videoPlayerId + '_fluid_controls_container');
     };
 
     self.isControlBarVisible = () => {
@@ -5813,11 +5763,11 @@ const fluidPlayerClass = function () {
 
         const controlBar = document.getElementById(self.videoPlayerId + '_fluid_controls_container');
         const style = window.getComputedStyle(controlBar, null);
-        return !(style.opacity == 0 || style.visibility == 'hidden');
+        return !(style.opacity === 0 || style.visibility === 'hidden');
     };
 
     self.setVideoPreload = () => {
-        const videoPlayerTag = document.getElementById(self.videoPlayerId);
+        const videoPlayerTag = self.domRef.player;
 
         videoPlayerTag.setAttribute('preload', this.displayOptions.layoutControls.preload);
     };
@@ -5836,7 +5786,7 @@ const fluidPlayerClass = function () {
             const divVastControls = videoPlayerTag.parentNode.getElementsByClassName('fluid_controls_container');
             const fpLogo = videoPlayerTag.parentNode.getElementsByClassName('fp_logo');
 
-            for (var i = 0; i < divVastControls.length; i++) {
+            for (let i = 0; i < divVastControls.length; i++) {
                 if (videoPlayerInstance.displayOptions.layoutControls.controlBar.animated) {
                     divVastControls[i].classList.remove('fade_in');
                     divVastControls[i].classList.add('fade_out');
@@ -5846,7 +5796,7 @@ const fluidPlayerClass = function () {
                 }
             }
 
-            for (var i = 0; i < fpLogo.length; i++) {
+            for (let i = 0; i < fpLogo.length; i++) {
                 if (videoPlayerInstance.displayOptions.layoutControls.controlBar.animated) {
                     if (fpLogo[i]) {
                         fpLogo[i].classList.remove('fade_in');
@@ -5876,7 +5826,7 @@ const fluidPlayerClass = function () {
             const divVastControls = videoPlayerTag.parentNode.getElementsByClassName('fluid_controls_container');
             const fpLogo = videoPlayerTag.parentNode.getElementsByClassName('fp_logo');
 
-            for (var i = 0; i < divVastControls.length; i++) {
+            for (let i = 0; i < divVastControls.length; i++) {
                 if (videoPlayerInstance.displayOptions.layoutControls.controlBar.animated) {
                     divVastControls[i].classList.remove('fade_out');
                     divVastControls[i].classList.add('fade_in');
@@ -5885,7 +5835,7 @@ const fluidPlayerClass = function () {
                 }
             }
 
-            for (var i = 0; i < fpLogo.length; i++) {
+            for (let i = 0; i < fpLogo.length; i++) {
                 if (videoPlayerInstance.displayOptions.layoutControls.controlBar.animated) {
                     if (fpLogo[i]) {
                         fpLogo[i].classList.remove('fade_out');
@@ -5906,7 +5856,7 @@ const fluidPlayerClass = function () {
     };
 
     self.linkControlBarUserActivity = () => {
-        const videoPlayerTag = document.getElementById(self.videoPlayerId);
+        const videoPlayerTag = self.domRef.player;
         videoPlayerTag.addEventListener('userInactive', self.hideControlBar);
         videoPlayerTag.addEventListener('userActive', self.showControlBar);
         videoPlayerTag.addEventListener('userInactive', self.hideTitle);
@@ -5915,13 +5865,13 @@ const fluidPlayerClass = function () {
 
     self.initMute = () => {
         if (self.displayOptions.layoutControls.mute === true) {
-            const videoPlayerTag = document.getElementById(self.videoPlayerId);
+            const videoPlayerTag = self.domRef.player;
             videoPlayerTag.volume = 0;
         }
     };
 
     self.initLoop = () => {
-        const videoPlayerTag = document.getElementById(self.videoPlayerId);
+        const videoPlayerTag = self.domRef.player;
         if (self.displayOptions.layoutControls.loop !== null) {
             videoPlayerTag.loop = self.displayOptions.layoutControls.loop;
         } else if (videoPlayerTag.loop) {
@@ -5930,22 +5880,22 @@ const fluidPlayerClass = function () {
     };
 
     self.setBuffering = () => {
-        const videoPlayer = document.getElementById(self.videoPlayerId);
+        const videoPlayer = self.domRef.player;
 
         const bufferBar = videoPlayer.parentNode.getElementsByClassName('fluid_controls_buffered');
 
-        for (var j = 0; j < bufferBar.length; j++) {
+        for (let j = 0; j < bufferBar.length; j++) {
             bufferBar[j].style.width = 0;
         }
 
         // Buffering
+        // TODO referencing local value in callback...
         const logProgress = function () {
             const duration = videoPlayer.duration;
             if (duration > 0) {
+
                 for (let i = 0; i < videoPlayer.buffered.length; i++) {
-
                     if (videoPlayer.buffered.start(videoPlayer.buffered.length - 1 - i) < videoPlayer.currentTime) {
-
                         const newBufferLength = (videoPlayer.buffered.end(videoPlayer.buffered.length - 1 - i) / duration) * 100 + "%";
 
                         for (let j = 0; j < bufferBar.length; j++) {
@@ -5953,7 +5903,8 @@ const fluidPlayerClass = function () {
                         }
 
                         // Stop checking for buffering if the video is fully buffered
-                        if ((videoPlayer.buffered.end(videoPlayer.buffered.length - 1 - i) / duration) == "1") {
+                        // TODO verify this actually does anything
+                        if ((videoPlayer.buffered.end(videoPlayer.buffered.length - 1 - i) / duration) === 1) {
                             clearInterval(progressInterval);
                         }
 
@@ -5963,7 +5914,7 @@ const fluidPlayerClass = function () {
                 }
             }
         };
-        var progressInterval = setInterval(logProgress, 500);
+        let progressInterval = setInterval(logProgress, 500);
     };
 
     self.createPlaybackList = () => {
@@ -6646,7 +6597,7 @@ const fluidPlayerClass = function () {
         // disable showing the captions, if user added subtitles track
         // we are taking subtitles track kind as metadata
         try {
-            if(!!self.domRef.player.textTracks) {
+            if (!!self.domRef.player.textTracks) {
                 for (const textTrack of self.domRef.player.textTracks) {
                     textTrack.mode = 'hidden';
                 }
